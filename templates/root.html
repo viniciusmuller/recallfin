@@ -59,10 +59,10 @@
   <body>
     <nav id="navbar">
       <a href={{ url_for('list_captures') }}>
-        Home
+        <img width="75" src="{{ url_for('static', filename='recallfin.png') }}" />
       </a>
 
-      <form class="search-form">
+      <form class="search-form" action="{{ url_for('list_captures') }}">
         <input autofocus type="text" name="query" placeholder="Query" />
         <button type="submit">
           Search
