@@ -2,3 +2,4 @@
 screenshots/
 database.db
 app.log
+__pycache__/

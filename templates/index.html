@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello Flask!</title>
+  </head>
+
+  <body>
+    <form>
+      <input type="text" name="query" placeholder="Query" />
+      <button type="submit">
+        Search
+      </button>
+    </form>
+
+    <div style="display: flex; gap: 50px">
+      {% for result in results %}
+        <div style="display: flex; align-items: center; flex-direction: column; gap: 15px">
+          <a href="{{ url_for('get_image', filename=result.filename) }}">
+            <img width="600" src="{{ url_for('get_image', filename=result.filename) }}" alt="Result Image">
+          </a>
+          <span>{{ result.timestamp | timestamp_to_date }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
+

@@ -11,6 +11,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
         python-packages = ps: with ps; [
+          flask
           numpy
           mss
           pytesseract

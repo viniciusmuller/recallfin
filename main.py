@@ -3,13 +3,13 @@ import pytesseract
 import numpy as np
 import mss
 
-import sqlite3
-import logging
 from pathlib import Path
-from datetime import datetime
+import logging
+import time
 import os
 
-IMAGES_DIRECTORY = "screenshots/"
+from constants import IMAGES_DIRECTORY, DATABASE_PATH
+from db import Database
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -32,52 +32,28 @@ def capture():
 
     return (frame, text)
 
-def setup_database(conn):
-    c = conn.cursor()
-    c.execute("CREATE VIRTUAL TABLE IF NOT EXISTS captures USING fts5(id, image_path, timestamp, text);")
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS captures (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            image_path TEXT,
-            timestamp TIMESTAMP,
-            text TEXT
-        );
-    """)
-    conn.commit()
+"""
+Saves the image to disk and add an entry for it in the database
+"""
+def save_capture(db, image, image_text):
+    timestamp = int(time.time())
 
-def insert_capture(conn, image, content):
-    c = conn.cursor()
-
-    timestamp = datetime.now()
-
-    img_relative_path = f"{IMAGES_DIRECTORY}/{timestamp}.jpg"
-    img_abs_path = os.path.abspath(img_relative_path)
+    filename = f"{timestamp}.jpg"
+    img_path = f"{IMAGES_DIRECTORY}/{filename}"
+    img_abs_path = os.path.abspath(img_path)
 
     cv2.imwrite(img_abs_path, image)
+    db.insert_capture(filename, image_text, timestamp)
 
-    c.execute("""
-        INSERT INTO captures (image_path, text, timestamp)
-        VALUES (?, ?, ?);
-    """, (img_abs_path, content, timestamp))
-
-    conn.commit()
     logging.debug('Inserted capture')
 
-def query_database(conn, query):
-    c = conn.cursor()
-    c.execute("""
-        SELECT id, timestamp, image_path, text FROM captures
-        WHERE text MATCH ?;
-    """, (query,))
+# def show_image(filename, timestamp):
+#     img_path = f"{IMAGES_DIRECTORY}/{filename}"
+#     image = cv2.imread(img_path, cv2.IMREAD_COLOR)
 
-    # todo: maybe map to dataclass
-    return c.fetchall()
-
-def show_image(image_path, timestamp):
-    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    cv2.imshow(f"Screenshot at {timestamp}", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+#     cv2.imshow(f"Screenshot at {timestamp}", image)
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
 
 def setup_images_directory(directory_path):
     directory = Path(directory_path)
@@ -87,24 +63,17 @@ def setup_images_directory(directory_path):
 
 
 def main():
-    conn = sqlite3.connect('database.db')
+    db = Database(DATABASE_PATH)
+    db.setup()
 
     setup_images_directory(IMAGES_DIRECTORY)
-    setup_database(conn)
 
     (image, content) = capture()
-    insert_capture(conn, image, content)
+    save_capture(db, image, content)
 
-    query = input("your query here: ")
-    for row in query_database(conn, query):
-        image_path = row[2]
-        timestamp = row[1]
-
-        print(image_path, timestamp)
-        if input("show image?") == "y":
-            show_image(image_path, timestamp)
-
-    conn.close()
+    results = db.query("data")
+    print(results)
+    print(f"found {len(results)} results")
 
 if __name__ == '__main__':
     main()
