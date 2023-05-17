@@ -47,7 +47,7 @@ class Database:
         c.execute("""
             SELECT id, timestamp, filename, text FROM captures 
             LIMIT ?1
-            OFFSET ?2 - ?1
+            OFFSET ?2 - ?1 - 1
         """, (n, capture.id))
 
         result = c.fetchall()
@@ -58,7 +58,7 @@ class Database:
         c.execute("""
             SELECT id, timestamp, filename, text FROM captures 
             LIMIT ?1
-            OFFSET ?2 + 1
+            OFFSET ?2
         """, (n, capture.id))
 
         result = c.fetchall()

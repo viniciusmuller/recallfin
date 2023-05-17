@@ -21,11 +21,6 @@
       padding: 20px;
     }
 
-    .search-form {
-      padding-top: 20px;
-      padding-bottom: 20px;
-    }
-
     .timestamp {
       border-radius: 8px;
       background-color: #5f3abd;
@@ -37,6 +32,8 @@
       width: 100%;
       background-color: #ddd;
       padding: 15px 25px;
+      display: flex;
+      gap: 25px;
     }
 
     .images-context {
@@ -64,6 +61,13 @@
       <a href={{ url_for('list_captures') }}>
         Home
       </a>
+
+      <form class="search-form">
+        <input autofocus type="text" name="query" placeholder="Query" />
+        <button type="submit">
+          Search
+        </button>
+      </form>
     </nav>
 
     <div id="app">
