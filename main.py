@@ -9,7 +9,7 @@ import time
 import os
 
 from constants import IMAGES_DIRECTORY, DATABASE_PATH
-from db import Database
+from database import Database
 
 logging.basicConfig(
     level=logging.DEBUG,

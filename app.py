@@ -3,7 +3,7 @@ from flask import Flask, render_template, send_from_directory, request, url_for
 from datetime import datetime
 
 from constants import DATABASE_PATH, IMAGES_DIRECTORY
-from db import Database
+from database import Database
 
 app = Flask(__name__)
 
