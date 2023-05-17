@@ -1,5 +1,3 @@
-# TODO: make DB class to encapsulate setup and getting conn
-
 import sqlite3
 from dataclasses import dataclass
 
@@ -19,31 +17,58 @@ class Database:
     def query(self, query):
         c = self.conn.cursor()
         c.execute("""
-            SELECT id, timestamp, filename, text FROM captures
-            WHERE text MATCH ?
-            ORDER BY timestamp DESC;
+            SELECT c.id, c.timestamp, c.filename, c.text
+            FROM captures c
+            JOIN captures_fts cfts
+            ON c.id = cfts.capture_id
+            WHERE cfts.text MATCH ?
+            ORDER BY c.timestamp DESC;
         """, (query,))
 
-        return [Capture(*row) for row in c.fetchall()]
+        result = c.fetchall()
+        print(result)
+        return [Capture(*row) for row in result]
 
-    def insert_capture(self, filename, text, timestamp):
+    def get_capture_by_id(self, id):
         c = self.conn.cursor()
         c.execute("""
-            INSERT INTO captures (filename, text, timestamp)
-            VALUES (?, ?, ?);
-        """, (filename, text, timestamp))
-        self.conn.commit()
+            SELECT id, timestamp, filename, text 
+            FROM captures WHERE id = ?
+        """, (id,))
+
+        if (row := c.fetchone()) is None:
+            return None
+
+        return Capture(*row)
+
+    def insert_capture(self, filename, text, timestamp):
+        with self.conn:
+            c = self.conn.cursor()
+
+            c.execute("""
+                INSERT INTO captures (filename, text, timestamp)
+                VALUES (?, ?, ?);
+            """, (filename, text, timestamp))
+
+            rowid = c.lastrowid
+            c.execute("""
+                INSERT INTO captures_fts (capture_id, text)
+                VALUES (?, ?);
+            """, (rowid, text))
 
     def setup(self):
         c = self.conn.cursor()
-        c.execute("CREATE VIRTUAL TABLE IF NOT EXISTS captures USING fts5(id, filename, timestamp, text);")
-        c.execute("""
+        c.executescript("""
             CREATE TABLE IF NOT EXISTS captures (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY,
                 filename TEXT,
                 timestamp TIMESTAMP,
                 text TEXT
             );
+        """)
+        c.executescript("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS captures_fts
+            USING fts5(capture_id, text);
         """)
         self.conn.commit()
 

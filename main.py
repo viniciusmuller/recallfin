@@ -71,9 +71,5 @@ def main():
     (image, content) = capture()
     save_capture(db, image, content)
 
-    results = db.query("data")
-    print(results)
-    print(f"found {len(results)} results")
-
 if __name__ == '__main__':
     main()

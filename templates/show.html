@@ -1,0 +1,12 @@
+{% extends 'root.html' %}
+
+{% block title %}
+  Capture at {{ capture.timestamp | timestamp_to_date }}
+{% endblock %}
+
+{% block body %}
+  <h1>Capture at {{ capture.timestamp | timestamp_to_date }}</h1>
+  <a href="{{ url_for('get_image', filename=capture.filename) }}" target="_blank" rel="noopener noreferrer">
+    <img width="50%" src="{{ url_for('get_image', filename=capture.filename) }}" alt="Result Image">
+  </a>
+{% endblock %}

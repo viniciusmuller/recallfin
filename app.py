@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, request
+from flask import Flask, render_template, send_from_directory, request, url_for
 
 from datetime import datetime
 
@@ -14,19 +14,26 @@ app.jinja_env.filters['timestamp_to_date'] = timestamp_to_date
 
 initial_db = Database(DATABASE_PATH)
 initial_db.setup()
+del initial_db
 
 @app.route("/")
-def hello_world():
+def list_captures():
     db = Database(DATABASE_PATH)
-    results = []
+    captures = []
+    # TODO: tolerate typos
     query = request.args.get('query')
 
     if query is not None:
-        results = db.query(query)
-        if len(results) > 0:
-            print(results[0])
+        captures = db.query(query)
 
-    return render_template('index.html', results=results)
+    return render_template('index.html', captures=captures)
+
+@app.route('/captures/<identifier>')
+def show_capture(identifier):
+    db = Database(DATABASE_PATH)
+    # TODO: parse links and add them to capture (as tags)
+    capture = db.get_capture_by_id(identifier)
+    return render_template('show.html', capture=capture)
 
 @app.route('/images/<filename>')
 def get_image(filename):

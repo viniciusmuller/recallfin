@@ -1,27 +1,27 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello Flask!</title>
-  </head>
+{% extends 'root.html' %}
 
-  <body>
-    <form>
-      <input type="text" name="query" placeholder="Query" />
+{% block title %}
+  Browse captures
+{% endblock %}
+
+{% block body %}
+  <div id="app">
+    <form class="search-form">
+      <input autofocus type="text" name="query" placeholder="Query" />
       <button type="submit">
         Search
       </button>
     </form>
 
-    <div style="display: flex; gap: 50px">
-      {% for result in results %}
+    <div id="images-container">
+      {% for capture in captures %}
         <div style="display: flex; align-items: center; flex-direction: column; gap: 15px">
-          <a href="{{ url_for('get_image', filename=result.filename) }}">
-            <img width="600" src="{{ url_for('get_image', filename=result.filename) }}" alt="Result Image">
+          <a href="{{ url_for('show_capture', identifier=capture.id) }}">
+            <img width="600" src="{{ url_for('get_image', filename=capture.filename) }}" alt="Result Image">
           </a>
-          <span>{{ result.timestamp | timestamp_to_date }}</span>
+          <span class="timestamp">{{ capture.timestamp | timestamp_to_date }}</span>
         </div>
       {% endfor %}
     </div>
-  </body>
-</html>
-
+  </div>
+{% endblock %}

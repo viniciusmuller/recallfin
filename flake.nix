@@ -15,8 +15,9 @@
           numpy
           mss
           pytesseract
-          # TODO: remove GTK2 support if cv.imshow is not being used
-          (opencv4.override { enableGtk2 = true; })
+          opencv4
+          # TODO: required if using cv2.imshow
+          # (opencv4.override { enableGtk2 = true; })
         ];
       in
       {
