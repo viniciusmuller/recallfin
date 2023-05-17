@@ -2,8 +2,10 @@ import cv2
 import pytesseract
 import numpy as np
 import mss
+import schedule
 
 from pathlib import Path
+import threading
 import logging
 import time
 import os
@@ -22,7 +24,7 @@ logging.basicConfig(
 
 def capture():
     with mss.mss() as sct:
-        monitor = sct.monitors[1] # TODO: maybe select monitor?
+        monitor = sct.monitors[1] # TODO: select monitor
         screenshot = sct.grab(monitor)
         frame = np.array(screenshot)
 
@@ -54,15 +56,31 @@ def setup_images_directory(directory_path):
     if not directory.exists():
         directory.mkdir(parents=True, exist_ok=True)
 
+# TODO: make configurable
+CAPTURE_INTERVAL_SECONDS = 10
+
+def do_capture():
+    db = Database(DATABASE_PATH)
+    logging.info(f'Capturing image')
+    (image, content) = capture()
+    save_capture(db, image, content)
+
+def run_threaded(job_func):
+    job_thread = threading.Thread(target=job_func)
+    job_thread.start()
 
 def main():
     db = Database(DATABASE_PATH)
     db.setup()
-
+    del db
     setup_images_directory(IMAGES_DIRECTORY)
 
-    (image, content) = capture()
-    save_capture(db, image, content)
+    logging.info(f'Starting schedule, capturing every {CAPTURE_INTERVAL_SECONDS} seconds')
+    schedule.every(CAPTURE_INTERVAL_SECONDS).seconds.do(run_threaded, do_capture)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == '__main__':
     main()

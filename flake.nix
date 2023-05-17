@@ -16,6 +16,7 @@
           mss
           pytesseract
           opencv4
+          schedule
           # TODO: required if using cv2.imshow
           # (opencv4.override { enableGtk2 = true; })
         ];
