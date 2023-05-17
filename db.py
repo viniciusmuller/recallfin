@@ -28,6 +28,28 @@ class Database:
         result = c.fetchall()
         return [Capture(*row) for row in result]
 
+    def get_previous_n(self, capture, n):
+        c = self.conn.cursor()
+        c.execute("""
+            SELECT id, timestamp, filename, text FROM captures 
+            LIMIT ?1
+            OFFSET ?2 - ?1
+        """, (n, capture.id))
+
+        result = c.fetchall()
+        return [Capture(*row) for row in result]
+
+    def get_next_n(self, capture, n):
+        c = self.conn.cursor()
+        c.execute("""
+            SELECT id, timestamp, filename, text FROM captures 
+            LIMIT ?1
+            OFFSET ?2 + 1
+        """, (n, capture.id))
+
+        result = c.fetchall()
+        return [Capture(*row) for row in result]
+
     def get_capture_by_id(self, id):
         c = self.conn.cursor()
         c.execute("""

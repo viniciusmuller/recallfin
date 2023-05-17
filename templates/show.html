@@ -7,6 +7,25 @@
 {% block body %}
   <h1>Capture at {{ capture.timestamp | timestamp_to_date }}</h1>
   <a href="{{ url_for('get_image', filename=capture.filename) }}" target="_blank" rel="noopener noreferrer">
-    <img width="50%" src="{{ url_for('get_image', filename=capture.filename) }}" alt="Result Image">
+    <img width="50%" src="{{ url_for('get_image', filename=capture.filename) }}" alt="Screen capture">
   </a>
+
+  <hr />
+  <h1>Context</h1>
+
+  <div class="images-context">
+    {% for p in previous %}
+      <a href="{{ url_for('show_capture', identifier=p.id) }}" >
+        <img src="{{ url_for('get_image', filename=capture.filename) }}" alt="Screen capture">
+      </a>
+    {% endfor %}
+
+    <img src="{{ url_for('get_image', filename=capture.filename) }}" alt="Screen capture">
+
+    {% for n in next %}
+      <a href="{{ url_for('show_capture', identifier=n.id) }}">
+        <img src="{{ url_for('get_image', filename=capture.filename) }}" alt="Screen capture">
+      </a>
+    {% endfor %}
+  </div>
 {% endblock %}

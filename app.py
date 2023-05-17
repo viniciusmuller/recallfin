@@ -23,7 +23,8 @@ def list_captures():
     # TODO: tolerate typos
     query = request.args.get('query')
 
-    if query is not None:
+    print(query)
+    if query is not None and len(query) > 0:
         captures = db.query(query)
 
     return render_template('index.html', captures=captures)
@@ -33,7 +34,9 @@ def show_capture(identifier):
     db = Database(DATABASE_PATH)
     # TODO: parse links and add them to capture (as tags)
     capture = db.get_capture_by_id(identifier)
-    return render_template('show.html', capture=capture)
+    previous = db.get_previous_n(capture, 2)
+    next = db.get_next_n(capture, 2)
+    return render_template('show.html', capture=capture, previous=previous, next=next)
 
 @app.route('/images/<filename>')
 def get_image(filename):
