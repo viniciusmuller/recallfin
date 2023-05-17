@@ -26,6 +26,7 @@ def capture():
         screenshot = sct.grab(monitor)
         frame = np.array(screenshot)
 
+    # TODO: improve image processing before running OCR
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     _, thresholded = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     text = pytesseract.image_to_string(thresholded)
@@ -46,14 +47,6 @@ def save_capture(db, image, image_text):
     db.insert_capture(filename, image_text, timestamp)
 
     logging.debug('Inserted capture')
-
-# def show_image(filename, timestamp):
-#     img_path = f"{IMAGES_DIRECTORY}/{filename}"
-#     image = cv2.imread(img_path, cv2.IMREAD_COLOR)
-
-#     cv2.imshow(f"Screenshot at {timestamp}", image)
-#     cv2.waitKey(0)
-#     cv2.destroyAllWindows()
 
 def setup_images_directory(directory_path):
     directory = Path(directory_path)

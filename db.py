@@ -26,7 +26,6 @@ class Database:
         """, (query,))
 
         result = c.fetchall()
-        print(result)
         return [Capture(*row) for row in result]
 
     def get_capture_by_id(self, id):
