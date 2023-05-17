@@ -28,6 +28,20 @@ class Database:
         result = c.fetchall()
         return [Capture(*row) for row in result]
 
+    def get_last_capture(self):
+        c = self.conn.cursor()
+        c.execute("""
+            SELECT id, timestamp, filename, text 
+            FROM captures 
+            ORDER BY timestamp DESC
+            LIMIT 1
+        """)
+
+        if (row := c.fetchone()) is None:
+            return None
+
+        return Capture(*row)
+
     def get_previous_n(self, capture, n):
         c = self.conn.cursor()
         c.execute("""

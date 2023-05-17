@@ -3,6 +3,8 @@ import pytesseract
 import numpy as np
 import mss
 import schedule
+import imagehash
+from PIL import Image
 
 from pathlib import Path
 import threading
@@ -14,7 +16,7 @@ from constants import IMAGES_DIRECTORY, DATABASE_PATH
 from database import Database
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
         logging.FileHandler('app.log'),
@@ -35,10 +37,25 @@ def capture():
 
     return (frame, text)
 
+def hash_image(cv2_image):
+    return imagehash.average_hash(Image.fromarray(cv2_image))
+
 """
 Saves the image to disk and add an entry for it in the database
 """
 def save_capture(db, image, image_text):
+    last_capture = db.get_last_capture()
+    if last_capture is not None:
+        img_hash = hash_image(image)
+
+        last_img_path = f"{IMAGES_DIRECTORY}/{last_capture.filename}"
+        last_img_hash = hash_image(cv2.imread(last_img_path))
+
+        difference = img_hash - last_img_hash
+        if difference < 5:
+            logging.info("Captured image and last capture too similar, aborting capture")
+            return
+
     timestamp = int(time.time())
 
     filename = f"{timestamp}.jpg"
@@ -48,7 +65,7 @@ def save_capture(db, image, image_text):
     cv2.imwrite(img_abs_path, image)
     db.insert_capture(filename, image_text, timestamp)
 
-    logging.debug('Inserted capture')
+    logging.info('Image capture persisted')
 
 def setup_images_directory(directory_path):
     directory = Path(directory_path)
@@ -61,7 +78,7 @@ CAPTURE_INTERVAL_SECONDS = 10
 
 def do_capture():
     db = Database(DATABASE_PATH)
-    logging.info(f'Capturing image')
+    logging.info(f'Starting image capture')
     (image, content) = capture()
     save_capture(db, image, content)
 

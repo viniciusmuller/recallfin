@@ -17,6 +17,8 @@
           pytesseract
           opencv4
           schedule
+          imagehash
+          pillow
           # TODO: required if using cv2.imshow
           # (opencv4.override { enableGtk2 = true; })
         ];
