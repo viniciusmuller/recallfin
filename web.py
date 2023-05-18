@@ -1,6 +1,7 @@
 from flask import Flask, render_template, send_from_directory, request, url_for
 
 from datetime import datetime
+import itertools
 
 from constants import DATABASE_PATH, IMAGES_DIRECTORY
 from database import Database
@@ -16,16 +17,22 @@ initial_db = Database(DATABASE_PATH)
 initial_db.setup()
 del initial_db
 
+def get_day(capture):
+    return datetime.utcfromtimestamp(capture.timestamp).strftime('%Y-%m-%d')
+
+def group_captures_by_date(captures):
+    return itertools.groupby(captures, get_day)
+
 @app.route("/")
 def list_captures():
     db = Database(DATABASE_PATH)
-    captures = []
+    captures = {}
     # TODO: tolerate typos
     query = request.args.get('query')
 
-    print(query)
     if query is not None and len(query) > 0:
-        captures = db.query(query)
+        result = db.query(query)
+        captures = group_captures_by_date(result)
 
     return render_template('index.html', captures=captures)
 

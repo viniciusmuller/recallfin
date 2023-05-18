@@ -5,18 +5,24 @@
 {% endblock %}
 
 {% block body %}
-  <div id="images-container">
-    {% for capture in captures %}
-      <div style="display: flex; align-items: center; flex-direction: column; gap: 15px">
-        <a href="{{ url_for('show_capture', identifier=capture.id) }}">
-          <img width="600" src="{{ url_for('get_image', filename=capture.filename) }}" alt="Result Image">
-        </a>
-        <span class="timestamp">{{ capture.timestamp | timestamp_to_date }}</span>
-      </div>
-    {% endfor %}
 
-    {% if captures|length == 0 %}
-      <p>Enter a query and check the results here</p>
-    {% endif %}
-  </div>
+  {% if captures.items %}
+    <p>Enter a query and check the results here</p>
+  {% endif %}
+
+  {% for day, group in captures %}
+    <details open>
+      <summary>{{ day }}</summary>
+      <div id="images-container">
+        {% for capture in group %}
+          <div style="display: flex; align-items: center; flex-direction: column; gap: 15px">
+            <a href="{{ url_for('show_capture', identifier=capture.id) }}">
+              <img width="600" src="{{ url_for('get_image', filename=capture.filename) }}" alt="Result Image">
+            </a>
+            <span class="timestamp">{{ capture.timestamp | timestamp_to_date }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </details>
+  {% endfor %}
 {% endblock %}

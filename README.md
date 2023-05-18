@@ -22,10 +22,10 @@ powerful extension for your memory.
 # TODO:
 - [x] Create logo and name for the project
 - [x] Add license
-- [ ] Group by time when listing entries (1 hour ago, 1 week ago, etc)
+- [x] Group by date when listing entries
 - [ ] Support queries between time intervals
 - [ ] Support spell correction using sqlite's spellfix1 extension
 - [ ] Add a requirements.txt and document non-nix installation
 - [ ] Improve OCR techniques
-- [ ] Improve CLI interface
+- [x] Improve CLI interface
 - [ ] Tag captures based on visible hyperlinks
