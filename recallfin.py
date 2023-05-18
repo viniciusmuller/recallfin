@@ -25,9 +25,15 @@ logging.basicConfig(
     ]
 )
 
-def capture():
+def list_monitors():
     with mss.mss() as sct:
-        monitor = sct.monitors[1] # TODO: select monitor
+        print("Available screens:")
+        for i, monitor in enumerate(sct.monitors):
+            print(i, "->", monitor)
+
+def capture(monitor_index):
+    with mss.mss() as sct:
+        monitor = sct.monitors[monitor_index]
         screenshot = sct.grab(monitor)
         frame = np.array(screenshot)
 
@@ -75,14 +81,14 @@ def setup_images_directory(directory_path):
         directory.mkdir(parents=True, exist_ok=True)
         logging.info("Screenshots directory does not exist, creating it")
 
-def do_capture():
-    db = Database(DATABASE_PATH)
-    logging.info(f'Starting image capture')
-    (image, content) = capture()
-    save_capture(db, image, content)
+def do_capture(monitor_index):
+    def inner():
+        db = Database(DATABASE_PATH)
+        logging.info(f'Starting image capture')
+        (image, content) = capture(monitor_index)
+        save_capture(db, image, content)
 
-def run_threaded(job_func):
-    job_thread = threading.Thread(target=job_func)
+    job_thread = threading.Thread(target=inner)
     job_thread.start()
 
 def main():
@@ -91,7 +97,13 @@ def main():
         description='Supercharge your memory using OCR, SQLite and HTML'
     )
     parser.add_argument('-i', '--interval', help='interval in seconds to capture the screen', type=int, default=10)
+    parser.add_argument('-l', '--list-monitors', help='list available screens', action='store_true')
+    parser.add_argument('-m', '--monitor-index', help='monitor index, see --list-monitors', type=int, default=0)
     args = parser.parse_args()
+
+    if args.list_monitors:
+        list_monitors()
+        return
 
     db = Database(DATABASE_PATH)
     db.setup()
@@ -99,7 +111,7 @@ def main():
     setup_images_directory(IMAGES_DIRECTORY)
 
     logging.info(f'Starting schedule, capturing every {args.interval} seconds')
-    schedule.every(args.interval).seconds.do(run_threaded, do_capture)
+    schedule.every(args.interval).seconds.do(lambda: do_capture(args.monitor_index))
 
     while True:
         schedule.run_pending()
