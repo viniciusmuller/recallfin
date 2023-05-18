@@ -28,13 +28,13 @@ def list_captures():
     db = Database(DATABASE_PATH)
     captures = {}
     # TODO: tolerate typos
-    query = request.args.get('query')
+    query = request.args.get('query') or ""
 
-    if query is not None and len(query) > 0:
+    if len(query) > 0:
         result = db.query(query)
         captures = group_captures_by_date(result)
 
-    return render_template('index.html', captures=captures)
+    return render_template('index.html', captures=captures, query=query)
 
 @app.route('/captures/<identifier>')
 def show_capture(identifier):

@@ -45,6 +45,10 @@
       width: 100%;
     }
 
+    img {
+      border: 1px solid #ddd;
+    }
+
     .images-context > a {
       display: flex;
       justify-content: center;
@@ -63,7 +67,7 @@
       </a>
 
       <form class="search-form" action="{{ url_for('list_captures') }}">
-        <input autofocus type="text" name="query" placeholder="Query" />
+        <input autocomplete="off" type="text" name="query" value="{{ query }}" placeholder="Query" />
         <button type="submit">
           Search
         </button>

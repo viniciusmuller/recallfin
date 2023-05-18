@@ -73,6 +73,7 @@ def setup_images_directory(directory_path):
 
     if not directory.exists():
         directory.mkdir(parents=True, exist_ok=True)
+        logging.info("Screenshots directory does not exist, creating it")
 
 def do_capture():
     db = Database(DATABASE_PATH)
