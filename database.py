@@ -18,12 +18,12 @@ class Database:
         c = self.conn.cursor()
         c.execute("""
             SELECT c.id, c.timestamp, c.filename, c.text
-            FROM captures c
-            JOIN captures_fts cfts
-            ON c.id = cfts.capture_id
+            FROM captures_fts cfts
+            JOIN captures c
+            ON cfts.capture_id = c.id
             WHERE cfts.text MATCH ?
             ORDER BY c.timestamp DESC;
-        """, (query,))
+        """, (f"\"{query}\"",))
 
         result = c.fetchall()
         return [Capture(*row) for row in result]
