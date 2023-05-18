@@ -1,10 +1,31 @@
 from flask import Flask, render_template, send_from_directory, request, url_for
 
 from datetime import datetime
+import argparse
 import itertools
+import logging
+import os
 
-from constants import DATABASE_PATH, IMAGES_DIRECTORY
 from database import Database
+import config
+
+parser = argparse.ArgumentParser(prog='recallfin-web', description='Supercharge your memory using OCR, SQLite and HTML')
+parser.add_argument('-d', '--data-directory', help="recallfin's data directory", type=str, default=config.get_directory())
+args = parser.parse_args()
+
+root_directory = os.path.expanduser(args.data_directory)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler(os.path.join(root_directory, "recallfin-web.log")),
+        logging.StreamHandler()
+    ]
+)
+
+SCREENSHOTS_DIRECTORY = config.screenshots_directory(root_directory)
+DATABASE_PATH = config.db_path(root_directory)
 
 app = Flask(__name__)
 
@@ -12,10 +33,6 @@ def timestamp_to_date(timestamp):
     return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 app.jinja_env.filters['timestamp_to_date'] = timestamp_to_date
-
-initial_db = Database(DATABASE_PATH)
-initial_db.setup()
-del initial_db
 
 def get_day(capture):
     return datetime.utcfromtimestamp(capture.timestamp).strftime('%Y-%m-%d')
@@ -47,6 +64,6 @@ def show_capture(identifier):
 
 @app.route('/images/<filename>')
 def get_image(filename):
-    return send_from_directory(IMAGES_DIRECTORY, filename)
+    return send_from_directory(SCREENSHOTS_DIRECTORY, filename)
 
 app.run()
