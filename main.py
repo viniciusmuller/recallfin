@@ -7,6 +7,7 @@ import imagehash
 from PIL import Image
 
 from pathlib import Path
+import argparse
 import threading
 import logging
 import time
@@ -73,9 +74,6 @@ def setup_images_directory(directory_path):
     if not directory.exists():
         directory.mkdir(parents=True, exist_ok=True)
 
-# TODO: make configurable
-CAPTURE_INTERVAL_SECONDS = 10
-
 def do_capture():
     db = Database(DATABASE_PATH)
     logging.info(f'Starting image capture')
@@ -87,13 +85,20 @@ def run_threaded(job_func):
     job_thread.start()
 
 def main():
+    parser = argparse.ArgumentParser(
+        prog='recallfin',
+        description='Supercharge your memory using OCR, SQLite and HTML'
+    )
+    parser.add_argument('-i', '--interval', help='interval in seconds to capture the screen', type=int, default=10)
+    args = parser.parse_args()
+
     db = Database(DATABASE_PATH)
     db.setup()
     del db
     setup_images_directory(IMAGES_DIRECTORY)
 
-    logging.info(f'Starting schedule, capturing every {CAPTURE_INTERVAL_SECONDS} seconds')
-    schedule.every(CAPTURE_INTERVAL_SECONDS).seconds.do(run_threaded, do_capture)
+    logging.info(f'Starting schedule, capturing every {args.interval} seconds')
+    schedule.every(args.interval).seconds.do(run_threaded, do_capture)
 
     while True:
         schedule.run_pending()

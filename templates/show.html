@@ -16,7 +16,7 @@
   <div class="images-context">
     {% for p in previous %}
       <a href="{{ url_for('show_capture', identifier=p.id) }}" >
-        <img src="{{ url_for('get_image', filename=capture.filename) }}" alt="Screen capture">
+        <img src="{{ url_for('get_image', filename=p.filename) }}" alt="Screen capture">
       </a>
     {% endfor %}
 
@@ -24,7 +24,7 @@
 
     {% for n in next %}
       <a href="{{ url_for('show_capture', identifier=n.id) }}">
-        <img src="{{ url_for('get_image', filename=capture.filename) }}" alt="Screen capture">
+        <img src="{{ url_for('get_image', filename=n.filename) }}" alt="Screen capture">
       </a>
     {% endfor %}
   </div>
